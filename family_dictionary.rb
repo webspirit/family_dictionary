@@ -12,8 +12,8 @@ require 'csv'
 # - multiple nodes with the same name
 
 def commands
-  # db_setup
-  # import_file
+  db_setup
+  import_file
   find_parent_names
   number_of_nodes_per_person
 end
@@ -62,10 +62,14 @@ class Sample < ActiveRecord::Base; end
 
 # Import files to database
 def import_file
-  file_name = "data/family_networks_1.csv"
-  CSV.foreach(file_name, { :headers => true, :col_sep => ";" }) do |row|
-    row.delete(nil)
-    Sample.create!(row.to_hash)
+  filenames = [] 
+  Dir.glob('data/*.csv') { |file| filenames << file }
+
+  filenames.each do |file_name|
+    CSV.foreach(file_name, { :headers => true, :col_sep => ";" }) do |row|
+      # row.delete(nil)
+      Sample.create!(row.to_hash)
+    end
   end
 end
 
@@ -84,17 +88,18 @@ end
 
 # How many times you have same person 
 def number_of_nodes_per_person
-  target_file = open("number_of_networks_a_person_is_in.txt", 'w')
+  target_file = open("output_number_of_networks_a_person_is_in.txt", 'w')
 
   count = Hash.new(0)
 
-  @father_names.each do |v|
+  (@father_names + @mother_names).each do |v|
     count[v] += 1
   end
-
-  target_file << count.each do |k, v|
-    puts "#{k} appears #{v} times"
+ 
+  count.each do |k, v|
+    target_file.puts "#{k} is in #{v} networks"
   end
+  target_file.close
 end
 
 
