@@ -33,6 +33,7 @@ def db_setup
   ActiveRecord::Schema.define do
     unless ActiveRecord::Base.connection.tables.include? 'samples'
       create_table :samples do |table|
+      	table.column :fix_buggy_data, :string
         table.column :network_no, :string
         table.column :source, :string
         table.column :target, :string
@@ -80,7 +81,7 @@ def find_parent_names
   @mother_names = []
 
   Sample.all.each do |sample|
-    parents = sample.target_name.split("-")
+    parents = sample.source_name.split("-")
     @father_names << parents[0]
     @mother_names << parents[1]
   end
@@ -101,7 +102,6 @@ def number_of_nodes_per_person
   end
   target_file.close
 end
-
 
 # Find unique names & save on txt
 
